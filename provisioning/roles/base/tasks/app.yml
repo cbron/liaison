@@ -1,0 +1,46 @@
+---
+
+# User + keys
+- name: make deploy_key dir
+  become: yes
+  file:
+    path: "{{ key_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: send deploy_key to user
+  become: yes
+  copy:
+    content: "{{deploy_key}}"
+    dest: "{{ key_file }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0600
+
+# Logs, dirs, configs
+
+- name: Ensure app directory exists and is writeable.
+  become: yes
+  file:
+    path: "{{ app_directory }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0755
+
+- name: Ensure boto.cfg file is present
+  become: yes
+  template:
+    src: boto.cfg.j2
+    dest: /etc/boto.cfg
+    mode: 0440
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+# Git
+
+- name: Configure Git
+  shell: "git config --global core.filemode false"
+  shell: "git config --global user.email ''"
+  shell: "git config --global user.name 'deployer'"

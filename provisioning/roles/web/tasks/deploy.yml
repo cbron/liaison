@@ -1,0 +1,52 @@
+---
+
+- name: git pull
+  git:
+    repo: git@bitbucket.org:username/repo.git
+    dest: "{{ app_directory }}"
+    accept_hostkey: true
+    key_file: "{{ key_file }}"
+    version: "{{ app_version }}"
+    force: yes
+  register: code_updated
+  notify: restart gunicorn
+
+- name: Update configs
+  template:
+    src: web_config.py.j2
+    dest: "{{ app_directory }}/liaison/config/production.py"
+  notify: restart gunicorn
+  when: code_updated.changed == true
+
+- name: pip install
+  pip:
+    requirements: "{{ app_directory }}/requirements.txt"
+    virtualenv: "{{ app_directory }}/venv"
+  notify: restart gunicorn
+  when: code_updated.changed == true
+
+- name: Ensure app has correct user for files.
+  become: yes
+  file:
+    path: "{{ app_directory }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0775
+    recurse: yes
+  notify: restart gunicorn
+
+- name: Ensure logs have correct user for files.
+  become: yes
+  file:
+    path: "{{ log_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    recurse: yes
+
+- name: Run migrations
+  shell: /opt/migrate.sh
+  notify: restart gunicorn
+  when: code_updated.changed == true
+

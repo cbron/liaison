@@ -1,0 +1,23 @@
+---
+
+- include: user.yml
+  when: first_run == 1
+- include: ssh.yml
+  when: first_run == 1
+- include: packages.yml
+  when: first_run == 0
+- include: security.yml
+  when: first_run == 0
+- include: new_relic.yml
+  when: first_run == 0
+
+- include: app.yml
+  when: install_app == 1
+  when: first_run == 0
+
+- include: supervisor.yml
+  when: install_supervisor == 1
+  when: first_run == 0
+
+- include: logs.yml
+  when: first_run == 0

@@ -1,0 +1,93 @@
+---
+
+###
+# Web 1
+###
+
+- name: get subnet_public_0 subnet id
+  command: "aws ec2 describe-subnets --filters Name=tag:Name,Values={{vpc_prefix}}_subnet_public_0 --query 'Subnets[0].SubnetId' --output text"
+  register: subnet_public_0
+  when: web_1
+
+- name: launch web 1
+  local_action:
+    module: ec2
+    region: "{{ region }}"
+    key_name: "{{ key_pair_name }}"
+    instance_type: "{{ web_instance_type }}"
+    image: "{{ image }}"
+    wait: yes
+    group: "{{ vpc_prefix }}_sg_web"
+    vpc_subnet_id: "{{ subnet_public_0.stdout }}"
+    assign_public_ip: yes
+    instance_tags:
+      Name: web1
+      class: web
+    exact_count: 1
+    count_tag:
+      Name: web-1
+  register: web_instance_1
+  when: subnet_public_0.stdout!="None"
+  when: web_1
+
+- debug:
+    msg: "Allocated VPC EC2 public IP{{ web_instance_1.instances[0].public_ip }}| {{ web_instance_1.instances[0].id }}"
+  with_items: web_instance_1.instances
+  when: web_1
+
+- name: tag instance_1
+  local_action: ec2_tag resource={{item.id}} region=us-west-2 state=present
+  with_items: web_instance_1.instances
+  args:
+    tags:
+      project: liaison
+      class: web
+      group: web
+  when: web_1
+
+###
+# Web 2
+###
+
+- name: get subnet_public_1 subnet id
+  command: "aws ec2 describe-subnets --filters Name=tag:Name,Values={{vpc_prefix}}_subnet_public_1 --query 'Subnets[0].SubnetId' --output text"
+  register: subnet_public_1
+  when: web_2
+
+- name: launch web 2
+  local_action:
+    module: ec2
+    region: "{{ region }}"
+    key_name: "{{ key_pair_name }}"
+    instance_type: "{{ web_instance_type }}"
+    image: "{{ image }}"
+    wait: yes
+    group: "{{ vpc_prefix }}_sg_web"
+    vpc_subnet_id: "{{ subnet_public_1.stdout }}"
+    assign_public_ip: yes
+    instance_tags:
+      Name: web2
+      class: web
+    exact_count: 1
+    count_tag:
+      Name: web-2
+  register: web_instance_2
+  when: subnet_public_1.stdout!="None"
+  when: web_2
+
+
+- debug:
+    msg: "Allocated VPC EC2 public IP{{ web_instance_2.instances[0].public_ip }}|"
+  with_items: web_instance_2.instances
+  when: web_2
+
+
+- name: tag instance_2
+  local_action: ec2_tag resource={{item.id}} region=us-west-2 state=present
+  with_items: web_instance_2.instances
+  args:
+    tags:
+      project: liaison
+      class: web
+      group: web
+  when: web_2

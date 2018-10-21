@@ -1,0 +1,77 @@
+---
+
+# ansible-playbook -i inventories/ec2.py -v web.yml
+
+- name: Web-EC2
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    - ec2_web: 1
+    - web_1: 0
+    - web_2: 0
+  roles:
+    - ec2
+
+
+- name: Web Base 1
+  hosts: tag_class_web
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars:
+    - first_run: 1
+    - ansible_ssh_user: ubuntu
+    - ansible_ssh_private_key_file: "{SSH_DIR}/{{ key_pair_name }}.pem"
+  roles:
+    - base
+
+
+- name: Web Base 2
+  hosts: tag_class_web
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars_files:
+    - group_vars/creds.yml
+  vars:
+    - first_run: 0
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  roles:
+    - base
+
+
+- name: Web Deploy
+  hosts: tag_class_web
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars_files:
+    - group_vars/creds.yml
+  vars:
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  roles:
+    - web
+
+
+- name: Web Firewall
+  hosts: tag_class_web
+  become_user: root
+  become: yes
+  gather_facts: true
+  vars:
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+    - firewall_allowed_tcp_ports:
+      - "2853" # ssh, already changed from 22 above
+      - "80"   # http
+      - "1443"  # https
+      - "5555" # flower
+  roles:
+    - geerlingguy.firewall
+

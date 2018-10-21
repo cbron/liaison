@@ -1,0 +1,24 @@
+{% extends 'errors/layout.html' %}
+{% set page_title = 'Unsubscribe' %}
+{% block body %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class='unsubscribe-text'>
+                    {% if found or unsubscribed %}
+                        <h4>Unsubscribe Successful</h4>
+                        <hr>
+                        You have been unsubscribed. Please allow 7 days for this change to take affect.
+                    {% else %}
+                        <h4>Unsubscribe</h4>
+                        <hr>
+                        Email not found.
+                        <br>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+---
+
+# ansible-playbook -i inventories/ec2.py -v worker.yml
+
+- name: Worker-EC2
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    - ec2_worker: 1
+    - worker_1: 1
+    - worker_2: 1
+    - worker_3: 0
+    - worker_4: 0
+  roles:
+    - ec2
+
+
+- name: Worker Base Run 1
+  hosts: tag_class_worker
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars:
+    - first_run: 1
+    - ansible_ssh_user: ubuntu
+    - ansible_ssh_private_key_file: "{SSH_DIR}/{{ key_pair_name }}.pem"
+  roles:
+    - base
+
+
+- name: Worker Base Run 2
+  hosts: tag_class_worker
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars_files:
+    - group_vars/creds.yml
+  vars:
+    - first_run: 0
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  roles:
+    - base
+
+
+- name: Worker Deploy
+  hosts: tag_class_worker
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  force_handlers: True
+  vars_files:
+    - group_vars/creds.yml
+  vars:
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  roles:
+    - worker
+
+
+- name: RDS Backups inside Worker
+  hosts: tag_Name_worker1 # <- only ever do this on one machine
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_method: sudo
+  vars_files:
+    - group_vars/creds.yml
+  vars:
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  tasks:
+    - include: roles/worker/tasks/db_backup.yml
+
+- name: Worker Firewall
+  hosts: tag_class_worker
+  become: yes
+  gather_facts: true
+  vars:
+    - firewall_allowed_tcp_ports:
+      - "2853"
+      - "5555"
+    - ansible_ssh_user: deployer
+    - ansible_ssh_port: 2853
+  roles:
+    - geerlingguy.firewall

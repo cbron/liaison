@@ -1,0 +1,36 @@
+---
+
+# ansible-playbook -v aws.yml
+
+# Run this first
+- name: AWS - make keys and VPC
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - include: aws/keys.yml
+    - include: aws/vpc.yml
+
+# Run this second (Use this to update security rules)
+- name: AWS - make security groups
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - aws/security_groups_rules.yml
+  vars:
+    vpc_id: "{{ liaison_vpc }}"
+    create_security_groups: 0
+    # private_subnet: 10.0.1.0/24 # <- used in NAT
+  tasks:
+    - include: aws/security_groups.yml
+
+# Run this third
+
+- name: AWS - S3
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - include: aws/s3.yml
+

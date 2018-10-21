@@ -1,0 +1,41 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Admin' %}
+
+{% block body %}
+  <div class="container">
+    <div class="row">
+        <div class="col-md-8">
+        <h5>Dispatches</h5>
+        </div>
+            <table class='table table-striped'>
+                <tr>
+                    <th>ID</th>
+                    <th>Account</th>
+                    <th>List</th>
+                    <th>Campaign</th>
+                    <th>State</th>
+                    <th>Percent</th>
+                    <th>Queued</th>
+                    <th>Sent</th>
+                    <th>Skipped</th>
+                    <th>Created</th>
+                </tr>
+                {% for d in dispatches %}
+                    <tr>
+                        <td><a href='{{ url_for("admin.dispatch", d_id=d.id) }}'>{{ d.id }}</a></td>
+                        <td>{{ d.account.name }}</td>
+                        <td>{{ d.list_.name }}</td>
+                        <td>{{ d.campaign.name }}</td>
+                        <td>{{ d.state }} - {{ d.current_state() }}</td>
+                        <td>{{ d.percent_complete }}</td>
+                        <td>{{ d.queued_count }}</td>
+                        <td>{{ d.sent_count }}</td>
+                        <td>{{ d.skipped_count }}</td>
+                        <td>{{ d.created() }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,7 @@
+---
+
+- include: ec2_web.yml
+  when: ec2_web == 1
+
+- include: ec2_worker.yml
+  when: ec2_worker == 1

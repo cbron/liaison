@@ -1,0 +1,72 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Confirm' %}
+
+{% block body %}
+    <div class="container">
+        <div class="page-header">
+            <h3>Begin send process</h3>
+            <a href="{{ url_for('campaign.edit', campaign_id=campaign.id) }}">Back to campaign</a>
+        </div>
+        <div class='row'>
+            <div class='col-md-8'>
+                {% if not valid_keys %}
+                    Dynamic data keys: invalid.
+                    <br>
+                    Some keys used in the email designs are not available in the list you have selected.
+                    <br>
+                    The first bad key found was <b>{{ bad_key }}</b>
+                    <br>
+                {% elif selector_dups %}
+                    You have more than one email selected for a selector value, which may lead to one person getting multiple emails.
+                    <br>
+                    The first bad key selector found was <b>{{ bad_selector }}</b>
+                    <br>
+                {% else %}
+                    <table class='table'>
+                        <tr>
+                            <td>Campaign</td>
+                            <td>{{ campaign.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>List</td>
+                            <td>{{ campaign.list_.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total list rows</td>
+                            <td>{{ campaign.list_.total_send_count() }}</td>
+                        </tr>
+                        <tr>
+                            <td>Actual send count</td>
+                            <td>{{ campaign.selector_send_count() }}</td>
+                        </tr>
+                        <tr>
+                            <td>Email Designs</td>
+                            <td>
+                                {{ email_list }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+                <br>
+                <form action="{{ url_for('campaign.confirm_dispatch', campaign_id=campaign.id) }}" method="post" role="form">
+                    {{ form.hidden_tag() }}
+                    <div class='row'>
+                        <div class='col-md-2'>
+                            {{ form.submit_now(class="btn btn-info") }}
+                        </div>
+                        <div class="col-md-8">
+                            {{ form.send_at(type='datetime-local', value=d_value, min=d_min, max=d_max )}}
+                            {{ form.submit_send_at(class="btn btn-info") }}
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <small>Emails will not be sent until you confirm on the next page.</small>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

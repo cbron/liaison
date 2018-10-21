@@ -1,0 +1,34 @@
+---
+
+- name: Create group
+  become: yes
+  group:
+    name: '{{ app_group }}'
+    state: present
+
+- name: Create user
+  become: yes
+  user:
+    name: "{{app_user}}"
+    group:  '{{ app_group }}'
+    createhome: yes
+    shell: "/bin/bash"
+  register: user_installed
+
+- name: Copy SSH key
+  become: yes
+  authorized_key:
+    user: "{{ app_user }}"
+    key: "{{ lookup('file', '/Users/USERNAME/.ssh/id_rsa.pub') }}"
+    manage_dir: yes
+
+# Logs
+
+- name: Make log dir
+  become: yes
+  file:
+    path: "{{log_dir}}"
+    state: directory
+    mode: 0774
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"

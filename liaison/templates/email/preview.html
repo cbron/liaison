@@ -1,0 +1,22 @@
+<html>
+    <body>
+        Refresh the page to see different dynamic data.
+        <br>
+        <a href="{{ url_for('email.edit', email_id=email_id, campaign_id=campaign_id) }}">Back</a>
+        <hr>
+        <h4>html version</h4>
+        <hr>
+    </body>
+</html>
+
+{{ html|safe }}
+
+<html>
+    <body>
+        <hr>
+        <h4>text version</h4>
+        <hr>
+    </body>
+</html>
+
+{{ text }}

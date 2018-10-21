@@ -1,0 +1,5 @@
+---
+
+celery_log_file: "{{ log_dir }}/celery.log"
+beat_log_file: "{{ log_dir }}/beat.log"
+celery_num_workers: 10 # concurrency

@@ -1,0 +1,20 @@
+---
+
+# ansible-playbook -v aws.yml
+
+- name: create key pair
+  local_action:
+    module: ec2_key
+    region: "{{ region }}"
+    name: "{{ key_pair_name }}"
+  register: mykey
+
+- name: write the private key to a file
+  local_action: "shell echo '{{ item.value.private_key }}' > {SSH_DIR}/{{ key_pair_name }}.pem"
+  with_dict: mykey
+  when: item.value.private_key is defined
+
+- name: chmod private key
+  file:
+    path: "{SSH_DIR}/{{ key_pair_name }}.pem"
+    mode: 0600

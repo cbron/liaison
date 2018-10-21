@@ -1,0 +1,130 @@
+---
+
+- name: Update apt cache if needed.
+  become: yes
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: "Install app dependencies (nginx)."
+  become: yes
+  apt: "name={{ item }} state=latest"
+  with_items:
+    - nginx
+
+# Nginx
+
+- name: Install nginx configuration file.
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    backup: yes
+  notify: restart nginx
+
+- name: Copy nginx htpasswd
+  become: yes
+  copy:
+    src: htpasswd
+    dest: /etc/nginx/.htpasswd
+  notify: restart nginx
+
+- name: Copy nginx site
+  become: yes
+  template:
+    src: nginx.site.j2
+    dest: /etc/nginx/sites-available/liaison
+    backup: yes
+  notify: restart nginx
+
+- name: Make site enabled
+  become: yes
+  command: ln -s /etc/nginx/sites-available/liaison
+           /etc/nginx/sites-enabled/liaison
+           creates=/etc/nginx/sites-enabled/liaison
+  notify: restart nginx
+
+- name: Remove nginx default site
+  become: yes
+  action: file path=/etc/nginx/sites-enabled/default state=absent
+  notify: restart nginx
+
+- name: Ensure Nginx service is started
+  become: yes
+  service: name=nginx state=started enabled=yes
+
+#Supervisor
+
+- name: Install supervisor program file.
+  become: yes
+  template:
+    src: supervisor.apps.conf.j2
+    dest: "/etc/supervisor/conf.d/apps.conf"
+  notify: update supervisor
+  notify: reread supervisor
+
+# Gunicorn
+
+- name: Install gunicorn conf file
+  become: yes
+  template:
+    src: gunicorn.conf.py.j2
+    dest: "/opt/gunicorn.conf.py"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0770
+  notify: restart nginx
+
+# Migrations
+
+- name: Copy migrate script
+  become: yes
+  copy:
+    src: migrate.sh
+    dest: /opt/migrate.sh
+
+- name: chmod migrate script
+  become: yes
+  file:
+    path: /opt/migrate.sh
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0700
+
+# Logs
+
+- name: Make logentries dir
+  become: yes
+  file:
+    path: /etc/le
+    state: directory
+    mode: 0770
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+
+- name: Copy logentries config file
+  become: yes
+  template:
+    src: le_config_web.j2
+    dest: /etc/le/config
+  notify: restart logentries
+
+
+- name: Install logentries daemon APT
+  become: yes
+  apt:
+    name: logentries-daemon
+    state: present
+
+
+# Git
+
+- name: Check if git repo exists
+  stat: path={{app_directory}}/.git
+  register: git_dir
+
+- name: Git filemode must be false
+  replace: >
+    dest={{ app_directory }}/.git/config
+    regexp='filemode = true'
+    replace='filemode = false'
+  when: git_dir.stat.exists

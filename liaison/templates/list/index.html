@@ -1,0 +1,51 @@
+{% from 'macros/_misc.html' import render_pagination, render_list_table %}
+{% from "macros/_form.html" import render_form %}
+
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Lists' %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header">
+        <h3>Lists</h3>
+    </div>
+        <div>
+            <form class="form-horizontal" method="POST" action="{{ url_for('list_.submit') }}">
+                {{ form.hidden_tag() }}
+                {{ form.name(placeholder="List Name", class="new-object") }}
+                {{ form.submit(class='btn-info btn') }}
+            </form>
+        </div>
+        <br>
+
+        {% if pagination and pagination.pages > 0 %}
+            {{ pagination.total }} total
+            <table class='table table-striped table-hover content-size'>
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Name</td>
+                        <td>Created at</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for list in pagination.items %}
+                    <tr>
+                        <td>{{ (loop.length + 1) - loop.index }}</td>
+                        <td><a href="{{ url_for('list_.edit', list_id=list.id) }}">{{ list.name }}</a></td>
+                        <td>{{ list.created_humanize() }}</td>
+                        <td>
+                            <form action="{{ url_for('list_.delete', list_id=list.id) }}" method="post" role="form">
+                                <button type="submit" onclick="return confirm('Are you sure ?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ render_pagination(pagination, 'list.index') }}
+        {% endif %}
+</div>
+{% endblock %}

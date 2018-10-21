@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Account' %}
+
+{% block body %}
+  <div class="container">
+    <div class="page-header">
+        <h3>{{ account.name }}&nbsp;<small><b>{{ account.domain }}</b></small></h3>
+
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <form class="form-horizontal" method="POST" action="{{ url_for('account.submit_default_from') }}">
+                {{ form.hidden_tag() }}
+                <label>Default "From" email address for outgoing emails: &nbsp;</label>
+                <br>
+                {{ form.default_from_email(placeholder="email@example.com", size=30) }}
+                {{ form.submit(class='btn') }}
+            </form>
+            <hr>
+            <a href={{ url_for("account.footer") }}>Edit Company Footer</a>
+            <hr>
+            <input type='checkbox' id='auto-text-checkbox' {%if auto_text%}checked{%endif%}/>&nbsp;&nbsp;Autogenerate a text version of all emails
+        </div>
+        <div class="col-md-5 col-md-offset-1">
+            {{ unsub_count }} unsubscribes - <a href={{ url_for("account.download_unsubscribes") }}>Download</a>
+            <br>
+            <a href={{ url_for("blacklist.index") }}>Edit Blacklist</a>
+        </div>
+      </div>
+    </div>
+{% endblock %}

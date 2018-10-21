@@ -1,0 +1,23 @@
+---
+
+- name: Register New Relic repository.
+  become: yes
+  get_url:
+    url: http://apt.newrelic.com/debian/newrelic.list
+    dest: /etc/apt/sources.list.d/newrelic.list
+
+- name: Download repo key.
+  become: yes
+  apt_key: url=http://download.newrelic.com/CHANGEME.gpg
+
+- name: Install New Relic.
+  become: yes
+  apt: pkg=newrelic-sysmond update_cache=yes
+
+- name: Configure New Relic with license key.
+  become: yes
+  shell: "nrsysmond-config --set license_key=CHANGEME"
+
+- name: Start New Relic.
+  become: yes
+  service: name=newrelic-sysmond state=started

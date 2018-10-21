@@ -1,0 +1,6 @@
+---
+
+update_apt_cache: yes
+security_sudoers_passwordless: ['deployer']
+security_sudoers_passworded: []
+security_autoupdate_enabled: true

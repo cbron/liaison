@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+{% set page_title = 'Edit Email' %}
+
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-10">
+        <div class = "page-header">
+          <h2>{{ email.name.capitalize() }}</h2>
+          <a href="{{ url_for('campaign.edit', campaign_id=campaign.id) }}">Back to campaign</a>
+        </div>
+        <form method="post" name="notification" role="form" action=" {{ url_for('email.update', campaign_id=campaign.id, email_id=email.id) }}">
+          <div class='form-group article-content'>
+            {{ form.hidden_tag() }}
+            <div class="row">
+              <div class="col-md-3">
+                <label>Email Name*</label>
+                {{ form.name(class='form-control') }}
+              </div>
+              {% if campaign.list_id and campaign.selector_col_name %}
+                <div class="col-md-6">
+                  <label>Who does this email get sent to ? (Selector)</label>
+                  {{ form.selector_col_val() }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="row">
+              <div class="col-md-3">
+                <label>{{form.subject.label}}</label>
+                {{ form.subject(class='form-control') }}
+              </div>
+              <div class="col-md-6">
+                <label>{{form.preheader.label}} (Snippet), not visible in email body.</label>
+                {{ form.preheader(class='form-control') }}
+              </div>
+            </div>
+            <br>
+            <div class="editor-error">Image Upload Error. The file may be too big (2MB limit) or an invalid type.</div>
+            <br>
+
+            <div class='html-to-text'>
+              {{form.html(id="email-editor", class='editor', placeholder='Text here...', rows='10', cols='30')}}
+            </div>
+            {% if not auto_text %}
+              <div class='text-from-html'>
+                {{form.text(id="text-editor", class='text-from-html-editor', placeholder='Edit the html to update the text automatically.', rows='10', cols='30')}}
+                <br>
+                <small>* Be aware the html to text converter is in beta, review the text before sending the campaign.</small>
+              </div>
+              <a href='#' class='show-html'>HTML</a> | <a href='#' class='show-text'>Text</a>
+              <br>
+            {% endif %}
+            <small>Note: The company footer will be automatically appended, you can see it in preview.</small>
+            <br><br>
+            {{ form.submit(class="btn btn-info") }}
+            <a href="{{ url_for('email.preview', campaign_id=campaign.id, email_id=email.id) }}" class='btn btn-inverse'>Preview</a>
+            <a href="{{ url_for('campaign.edit', campaign_id=campaign.id) }}" class='btn btn-default'>Back to Campaign</a>
+          </div>
+        </form>
+        <div data-campaign-id='{{campaign.id}}' id='campaign_id'></div>
+        <div data-email-id='{{email.id}}' id='email_id'></div>
+
+      </div>
+      <div class="col-md-2 campaign_edit_sidebar email_edit_sidebar">
+        <b>Keys</b>
+        <hr>
+        {% for key in keys %}
+          <span class='dd-key'>{{ key }}</span>
+          <br>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+
+
+{% endblock %}

@@ -1,0 +1,59 @@
+---
+
+- name: Update apt cache if needed.
+  become: yes
+  apt: update_cache=yes cache_valid_time=3600 upgrade=dist
+
+- name: Install base packages
+  become: yes
+  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=latest
+  with_items:
+    - build-essential
+    - git
+    - vim
+    - curl
+    - ntp
+    - htop
+    - libpq-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - zlib1g-dev
+    - gcc
+    - gcc-multilib
+    - g++-multilib
+    - libncurses5-dev
+    - python-dev
+    - python-pycurl
+    - python-pip
+    - python-setuptools
+    - supervisor
+    - redis-tools
+    - s3cmd
+    - postgresql-client
+
+- name: update pip
+  become: yes
+  action: pip name=pip state=latest
+
+- name: Install with pip
+  become: yes
+  pip: name=virtualenv
+
+- name: Ensure bash, OpenSSl, and libssl are the latest versions
+  become: yes
+  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+  with_items:
+    - bash
+    - openssl
+    - libssl-dev
+    - libssl-doc
+
+- name: Set timezone variables
+  become: yes
+  copy: content='US/Arizona\n'
+        dest=/etc/timezone
+        owner=root
+        group=root
+        mode=0644
+        backup=yes
+  notify: update timezone

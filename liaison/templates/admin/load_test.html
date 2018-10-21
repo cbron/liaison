@@ -1,0 +1,12 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Admin' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Load Test: {{ count }}</h2>
+            <a href="{{ url_for('admin.admin_index') }}">back</a>
+        </div>
+    </div>
+{% endblock %}

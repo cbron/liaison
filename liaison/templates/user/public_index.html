@@ -1,0 +1,35 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = '' %}
+
+{% block body %}
+<div class="container">
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <h3></h3>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <h3></h3>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3 col-centered text-center">
+            <div>
+                <br>
+                Sign up to receive updates
+                <br>
+                <form method="POST" action="{{ url_for('user.subscribe') }}">
+                    {{ form.hidden_tag() }}
+                    {{ form.email(placeholder="your@email.com", class='form-control') }}
+                    <br>
+                    {{ form.submit(class="btn btn-info") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.ssh.insert_key = false
+
+  # General VirtualBox VM configuration.
+  config.vm.provider :virtualbox do |v|
+    v.memory = 512
+    v.cpus = 1
+  end
+
+  boxes = [
+    { :name => "web", :ip => "changme" },
+    { :name => "celery", :ip => "changme" },
+    { :name => "rmq", :ip => "changme" },
+    { :name => "db", :ip => "changme" },
+    { :name => "redis", :ip => "changme" }
+  ]
+
+  # Provision each of the VMs.
+  boxes.each do |opts|
+    config.vm.define opts[:name] do |config|
+      config.vm.hostname = opts[:name]
+      config.vm.network :private_network, ip: opts[:ip]
+      # # Provision all the VMs using Ansible after the last VM is booted.
+      if opts[:name] == 'db' or opts[:name] == 'web' or opts[:name] == 'celery'
+        config.vm.provider :virtualbox do |v|
+          v.memory = 512
+        end
+      end
+    end
+  end
+
+end
+

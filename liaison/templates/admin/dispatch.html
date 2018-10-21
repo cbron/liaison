@@ -1,0 +1,78 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Admin' %}
+
+{% block body %}
+  <div class="container">
+    {% if d %}
+        <div class="page-header">
+            <h4>Dispatch</h4>
+            <b><a href="{{ url_for('admin.sends', dispatch_id=d.id) }}">Sends</a></b>
+        </div>
+        <div class="row">
+                <table class='table table-striped'>
+                    <tr>
+                        <td>ID: </td><td> {{d.id}}</td>
+                    </tr><tr>
+                        <td>Account: </td><td> {{ d.account.name }}</td>
+                    </tr><tr>
+                        <td>List: </td><td> {{ d.list_.name }}</td>
+                    </tr><tr>
+                        <td>Campaign: </td><td> {{ d.campaign.name }}</td>
+                    </tr><tr>
+                        <td>State: </td><td>{{ d.state }} - {{ d.current_state() }}</td>
+                    </tr><tr>
+                        <td>% complete: </td><td> {{ d.get_percent_complete() }}</td>
+                    </tr><tr>
+                        <td>Created: </td><td> {{ d.created_humanize() }}, {{ d.created() }}</td>
+                    </tr><tr>
+                        {% if d.import_data and d.import_data[0] %}
+                            <td>Data[0]: </td><td> {{ d.import_data[0] }}</td>
+                        {% endif %}
+                    </tr>
+                </table>
+                <h4>Counts</h4>
+                <table class='table table-striped'>
+                    <tr>
+                        <th>Type</th>
+                        <th>Queued</th>
+                        <th>Sent</th>
+                        <th>Skipped</th>
+                    </tr>
+                    <tr>
+                        <td>DB</td>
+                        <td>{{ d.queued_count }}</td>
+                        <td>{{ d.sent_count }}</td>
+                        <td>{{ d.skipped_count }}</td>
+                    </tr>
+                    {% if r_up %}
+                        <tr>
+                            <td>Redis</td>
+                            <td> {{ d.get_queued() }}</td>
+                            <td> {{ d.get_sent() }}</td>
+                            <td> {{ d.get_skipped() }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td>Redis OFFLINE</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
+                </table>
+
+                <br>
+                <form action="{{ url_for('admin.dispatch_next', d_id=d.id) }}" method="post" role="form">
+                    <button type="submit" onclick="return confirm('dispatch_next() ?')">Dispatch.Next()</button>
+                </form>
+
+                <br>
+                <form action="{{ url_for('admin.dispatch_retry_for_lost_tasks', d_id=d.id) }}" method="post" role="form">
+                    <button type="submit" onclick="return confirm('dispatch_retry_for_lost_tasks() ?')">Dispatch.retry_for_lost_tasks()</button>
+                </form>
+
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'layouts/base.html' %}
+{% from "macros/_form.html" import render_form %}
+{% set page_title = 'Campaign Editor' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class = "page-header">
+                    <h3>{{campaign.name}}</h3>
+                </div>
+                <form class="form-horizontal" method="POST" action="{{ url_for('campaign.update', campaign_id=campaign.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class='row'>
+                        <h6>Delivery Details</h6>
+                        <div class='col-md-2'>
+                            <label>Name</label>
+                        </div>
+                        <div class='col-md-4'>
+                            <label>{{ form.name(class='form-control') }}</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class='col-md-2'>
+                            <label>{{form.from_email_dd.label}}</label>
+                        </div><div class='col-md-4'>
+                            {{ form.from_email_dd(class='dd-options form-control', disabled=true) }}
+                        </div><div class='col-md-1'>
+                            or
+                        </div><div class='col-md-4'>
+                            {{ form.from_email_ov(placeholder="Manual Override", class='form-control') }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class='col-md-2'>
+                            <label>{{form.reply_to_dd.label}}</label>
+                        </div><div class='col-md-4'>
+                            {{ form.reply_to_dd(class='dd-options form-control') }}
+                        </div><div class='col-md-1'>
+                            or
+                        </div><div class='col-md-4'>
+                            {{ form.reply_to_ov(placeholder="Manual Override", class='form-control') }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class='col-md-2'>
+                            <label>{{form.from_name_dd.label}}</label>
+                        </div><div class='col-md-4'>
+                            {{ form.from_name_dd(class='dd-options form-control') }}
+                        </div><div class='col-md-1'>
+                            or
+                        </div><div class='col-md-4'>
+                            {{ form.from_name_ov(placeholder="Manual Override", class='form-control') }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class='col-md-2'>
+                            <label>{{form.to_email_dd.label}}</label>
+                        </div><div class='col-md-4'>
+                            {{ form.to_email_dd(class='dd-options form-control') }}
+                        </div><div class='col-md-1'>
+                            or
+                        </div><div class='col-md-4'>
+                            {{ form.to_email_ov(placeholder="Manual Override", class='form-control') }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class='col-md-2'>
+                            <label>{{form.to_name_dd.label}}</label>
+                        </div><div class='col-md-4'>
+                            {{ form.to_name_dd(class='dd-options form-control') }}
+                        </div><div class='col-md-1'>
+                            or
+                        </div><div class='col-md-4'>
+                            {{ form.to_name_ov(placeholder="Manual Override", class='form-control') }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <h6>Selector<small> - optional</small></h6>
+                        <div class='col-md-12'>
+                            <label>Select a column below to send different email design variations to specific people based on data in that column.</label>
+                        </div>
+                        <div class='col-md-4'>
+                            {{ form.selector_col_name(class='dd-options form-control') }}
+                        </div>
+                    </div>
+
+                    <br>
+                    {{ form.submit(class="btn btn-info") }}
+                </form>
+                <hr>
+                <br>
+                <h6>
+                    Email Designs
+                    <a href="{{url_for('email.new', campaign_id=campaign.id)}}" class='btn btn-link'>Add</a>
+                </h6>
+                <hr>
+                <div id="email_list">
+                    <table class="table table-striped content-size">
+                        <thead>
+                            <tr>
+                                <td>#</td>
+                                <td>Name</td>
+                                <td>Created at</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for email in emails %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><a href="{{ url_for('email.edit', campaign_id=campaign.id, email_id=email.id) }}" style='text-decoration:underline'>{{ email.name }}</a></td>
+                                <td>{{ email.created_humanize() }}</td>
+                                <td>
+                                    <form action="{{ url_for('email.delete', email_id=email.id, campaign_id=campaign.id) }}" method="post" role="form">
+                                        <button type="submit" onclick="return confirm('Are you sure ?')">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <br>
+                    <hr>
+                    <a href="{{ url_for('campaign.dispatcher', campaign_id=campaign.id) }}" class="btn btn-info">Begin Send Process</a>
+                    <br><br>
+                </div>
+            </div>
+
+           <!-- Sidebar -->
+            <div class="col-md-4 campaign_edit_sidebar ">
+                <form action="#" method="get" role="form">
+                    {{ list_form.hidden_tag() }}
+                    <div class='form-group'>
+                        <div class='input-group'>
+                            <h6>List</h6>
+                            {{ list_form.list_id(class="campaign_list_select", **{'data-placeholder': "Select a list to see it's options"}) }}
+                            <span id='list_updated'><img src="/static/img/tick.png" height='20' width='20'></span>
+                        </div>
+                        {% raw %}
+                        <div id='campaign_list_select_result' style='display:none;'>Options:</div>
+                        {% endraw %}
+                    </div>
+                </form>
+                <input id='campaign_identifier' value="{{campaign.id}}"  type="hidden"/>
+                <input id='list_identifier' value="{{campaign.list_id}}"  type="hidden"/>
+            </div>
+        </div>
+    </div>
+{% endblock %}

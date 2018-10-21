@@ -1,0 +1,35 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Sends' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8">
+            <h5>Sends</h5>
+            <table class='table table-condensed table-striped'>
+                <tr>
+                    <th>ID</th>
+                    <th>Dispatcher</th>
+                    <th>Email</th>
+                    <th>Attempts</th>
+                    <th>State</th>
+                    <th>Date</th>
+                </tr>
+                {% for send in sends %}
+                    <tr>
+                        {% if send.hash_id %}
+                            <td><a href="{{ url_for('admin.send_details', hash_id=send.hash_id) }}">#{{ send.id }}</a></td>
+                        {% else %}
+                            <td><a href="{{ url_for('admin.send_details', id=send.id) }}">NO HASH_ID</a></td>
+                        {% endif %}
+                        <td>{{ send.dispatcher_id }}</td>
+                        <td>{{ send.email_id }} - {{ send.email.name }}</td>
+                        <td>{{ send.attempts }}</td>
+                        <td>{{ send.state }}: {{send.current_state()}}</td>
+                        <td>{{ send.created() }} - {{ send.created_humanize() }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

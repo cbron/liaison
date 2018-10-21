@@ -1,0 +1,30 @@
+---
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  become: yes
+
+- name: reload nginx
+  service: name=nginx state=reloaded
+  become: yes
+
+- name: restart gunicorn
+  supervisorctl: name=web state=restarted
+
+- name: reread supervisor
+  become: yes
+  shell: supervisorctl reread
+
+- name: update supervisor
+  become: yes
+  shell: supervisorctl update
+
+- name: rsyslog restart
+  become: yes
+  command: "service rsyslog restart"
+
+- name: restart logentries
+  become: yes
+  service: name=logentries state=restarted
+  ignore_errors: true
+

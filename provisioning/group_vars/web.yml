@@ -1,0 +1,4 @@
+---
+box: web
+install_app: 1
+install_supervisor: 1

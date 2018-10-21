@@ -1,0 +1,74 @@
+---
+
+- name: Get iptables rules
+  become: yes
+  shell: iptables -L
+  register: iptablesrules
+
+# http://www.hashbangcode.com/blog/adding-iptables-rules-ansible
+- name: Open port 2853 for ssh
+  become: yes
+  shell: iptables -A INPUT -p tcp --dport {{ security_ssh_port }} -j ACCEPT -m comment --comment 'customssh'
+  when: iptablesrules.stdout.find("customssh") == -1
+
+# The below is from: https://github.com/geerlingguy/ansible-role-security
+
+- name: Update SSH configuration to be more secure.
+  become: yes
+  lineinfile: >
+    dest=/etc/ssh/sshd_config
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+    state=present
+  with_items:
+    - { regexp: "^PasswordAuthentication", line: "PasswordAuthentication no" }
+    - { regexp: "^PermitRootLogin", line: "PermitRootLogin no" }
+    - { regexp: "^Port", line: "Port {{ security_ssh_port }}" }
+    - { regexp: "^AllowUsers", line: "AllowUsers {{ app_user }}" }
+  notify: restart ssh
+
+- name: Add configured user accounts to passwordless sudoers.
+  become: yes
+  lineinfile: >
+    dest=/etc/sudoers
+    regexp='^{{ item }}'
+    line='{{ item }} ALL=(ALL) NOPASSWD: ALL'
+    state=present
+    validate='visudo -cf %s'
+  with_items: security_sudoers_passwordless
+  when: security_sudoers_passwordless
+
+- name: Add configured user accounts to passworded sudoers. (remove all)
+  become: yes
+  lineinfile: >
+    dest=/etc/sudoers
+    regexp='^{{ item }}'
+    line='{{ item }} ALL=(ALL)'
+    state=present
+    validate='visudo -cf %s'
+  with_items: security_sudoers_passworded
+  when: security_sudoers_passworded
+
+- name: Copy logssh.sh script
+  become: yes
+  copy: src=logssh.sh
+        dest=/usr/local/bin/logssh.sh
+        owner={{app_user}}
+        group={{app_group}}
+        mode=0760
+
+- name: Log every ssh login
+  become: yes
+  lineinfile: >
+    dest=/etc/pam.d/sshd
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+    state=present
+  with_items:
+    - { regexp: "/usr/local/bin/logssh.sh", line: "session optional pam_exec.so seteuid  /usr/local/bin/logssh.sh" }
+  notify: restart ssh
+
+
+- name: restart ssh for updates
+  become: yes
+  command: "service ssh restart" # <- see handler about bug

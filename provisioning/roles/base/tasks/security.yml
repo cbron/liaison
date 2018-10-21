@@ -1,0 +1,40 @@
+---
+
+# https://github.com/geerlingguy/ansible-role-security
+
+# Fail2Ban
+
+- name: Install fail2ban.
+  become: yes
+  apt: pkg=fail2ban state=present
+
+- name: Ensure fail2ban is running and enabled on boot.
+  become: yes
+  service: name=fail2ban state=started enabled=yes
+
+# Autoupdate
+
+- name: Install unattended upgrades package.
+  become: yes
+  apt: pkg=unattended-upgrades state=installed
+
+- name: Copy unattended-upgrades configuration files in place.
+  become: yes
+  template: >
+    src=../templates/{{ item }}.j2
+    dest=/etc/apt/apt.conf.d/{{ item }}
+    owner=root group=root mode=0644
+  with_items:
+    - 10periodic
+    - 50unattended-upgrades
+
+# Remove packages
+
+- name: Remove unused packages.
+  become: yes
+  apt: name={{ item }} state=absent purge=yes
+  with_items:
+    - apache2
+    - mysql
+    - nano
+    - mailutils

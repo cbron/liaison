@@ -1,0 +1,84 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Sends' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8">
+            {% if send %}
+                <b>Send</b>
+                <br><br>
+                <table class='table table-striped'>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ send.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Hash_id</td>
+                        <td> {{send.hash_id}}</td>
+                    </tr>
+                    <tr>
+                        <td>Created</td>
+                        <td>{{ send.created() }} - {{ send.created_humanize() }}</td>
+                    </tr>
+                    <tr>
+                        <td>State</td>
+                        <td>{{ send.state }}: {{send.current_state()}}</td>
+                    </tr>
+                    <tr>
+                        <td>Attempts</td>
+                        <td>{{ send.attempts }}</td>
+                    </tr>
+                    <tr>
+                        <td>Dispatcher</td>
+                        <td>{{ send.dispatcher.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Campaign</td>
+                        <td>{{ send.dispatcher.campaign_id }} - {{ send.dispatcher.campaign.name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{ send.email_id }} - {{ send.email.name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>{{ send.status }}</td>
+                    </tr>
+                    <tr>
+                        <td>Result</td>
+                        <td>
+                            {% if send.result and send.result[0] %}
+                                {% for key,val in send.result[0].items() %}
+                                    {{ key }}: <b>{{ val }}</b><br>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Data</td>
+                        <td>
+                            {% if send.data %}
+                                {% for key,val in send.data.items() %}
+                                    {{ key }}: <b>{{ val }}</b><br>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Message</td>
+                        <td>
+                            {% if send.message %}
+                                {% for key,val in send.message.items() %}
+                                    {{ key }}: <b>{{ val }}</b><br>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            {% else %}
+                Not found
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

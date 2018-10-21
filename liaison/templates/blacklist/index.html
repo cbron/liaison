@@ -1,0 +1,57 @@
+{% from 'macros/_misc.html' import render_pagination%}
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Blacklist' %}
+
+{% block body %}
+    <div class="container">
+        <div class="page-header">
+            <h2>Blacklist</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <p>
+                    Your blacklist is a list of emails that will never be sent too. Bounces and Spam reports will be added here automatically.
+                </p>
+                <p>
+                    To add your own blacklist, upload a .csv file that contains an email column. Optionally it may contain a 'reason' and a 'detail' column.
+                </p>
+            </div>
+            <div class="col-md-4 col-md-offset-1">
+                <form action="{{ url_for('blacklist.upload') }}" method=post enctype=multipart/form-data>
+                    <p>
+                        <input type=file name=file>
+                        <input type=submit value=Upload>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        {% if pagination and pagination.pages > 0 %}
+            {{ pagination.total }} total
+            <table class='table table-striped table-hover content-size'>
+                <thead>
+                    <tr>
+                        <td>Email</td>
+                        <td>Reason</td>
+                        <td>Detail</td>
+                        <td>Created at</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in pagination.items %}
+                    <tr>
+                        <td>{{ data.email }}</a></td>
+                        <td>{{ data.reason }}</a></td>
+                        <td>{{ data.detail }}</a></td>
+                        <td>{{ data.created_humanize() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ render_pagination(pagination, 'blacklist.index') }}
+        {% endif %}
+
+    </div>
+
+{% endblock %}

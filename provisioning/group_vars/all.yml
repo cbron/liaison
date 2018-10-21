@@ -1,0 +1,29 @@
+---
+
+app_name: liaison
+app_version: 1.0
+app_directory: /opt/liaison
+app_dir: /opt/liaison
+log_dir: /var/log/liaison
+
+original_user: ubuntu
+app_user: deployer
+app_group: deployers
+key_dir: /home/deployer/.ssh
+key_file: /home/deployer/.ssh/deploy_key
+
+security_ssh_port: 2853 # 22
+key_pair_name: changeme
+allowed_ip: changeme
+region: us-west-2 # oregon
+az0: us-west-2a # oregon-a
+az1: us-west-2b # oregon-b
+image: ami-5189a661 #ubuntu 14.04
+vpc_prefix: liaison
+
+# defaults for includes
+ec2_web: 0
+ec2_worker: 0
+
+web_instance_type: t2.small
+worker_instance_type: t2.small

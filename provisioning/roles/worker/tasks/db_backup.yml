@@ -1,0 +1,25 @@
+---
+
+- name: "Copy RDS backup script"
+  become: yes
+  template:
+    src: db_backup.sh.j2
+    dest: /usr/local/bin/db_backup.sh
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0770
+
+- cron:
+    name: "backup database and send to s3"
+    minute: "30"
+    hour: "1"
+    job: "sudo /usr/local/bin/db_backup.sh >> {{log_dir}}/db_backup.log 2>&1"
+
+- name: Create PG cred file
+  become: yes
+  template:
+    src: pgpass.j2
+    dest: /home/deployer/.pgpass
+    mode: 0600
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"

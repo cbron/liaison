@@ -1,0 +1,12 @@
+---
+
+- name: create S3 buckets
+  local_action:
+    module: s3
+    bucket: "{{ item }}"
+    mode: create
+  with_items:
+    - liaison-pf
+    - liaison-uploads
+    - liaison-logs
+    - liaison-backups

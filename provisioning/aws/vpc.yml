@@ -1,0 +1,37 @@
+---
+
+- name: create multi-az vpc
+  local_action:
+    module: ec2_vpc
+    region: "{{ region }}"
+    cidr_block: 10.0.0.0/16
+    resource_tags: '{"Name":"{{ vpc_prefix }}_vpc"}'
+    subnets:
+      - cidr: 10.0.0.0/24 # min of /27 for ELB
+        az: "{{ az0 }}"
+        resource_tags: '{"Name":"{{ vpc_prefix }}_subnet_public_0"}'
+      - cidr: 10.0.1.0/24
+        az: "{{ az0 }}"
+        resource_tags: '{"Name":"{{ vpc_prefix }}_subnet_private_0"}'
+      - cidr: 10.0.2.0/24
+        az: "{{ az1 }}"
+        resource_tags: '{"Name":"{{ vpc_prefix }}_subnet_public_1"}'
+      - cidr: 10.0.3.0/24
+        az: "{{ az1 }}"
+        resource_tags: '{"Name":"{{ vpc_prefix }}_subnet_private_1"}'
+    internet_gateway: yes
+    route_tables:
+      - subnets:
+          - 10.0.0.0/24
+          - 10.0.2.0/24
+        routes:
+          - dest: 0.0.0.0/0
+            gw: igw
+  register: vpc
+
+- name: "write vpc id to {{ vpc_prefix }}_vpc_info file"
+  local_action: 'shell echo "{{ vpc_prefix }}"_vpc":" "{{ vpc.vpc_id }}" > "{{ vpc_prefix }}"_vpc_info'
+
+- name: "write subnets id to {{ vpc_prefix }}_vpc_info file"
+  local_action: 'shell echo "{{ item.resource_tags.Name }}"":" "{{ item.id }}" >> "{{ vpc_prefix }}"_vpc_info'
+  with_items: vpc.subnets

@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Admin' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-8">
+            <h2>End to end test: {{ status }}</h2>
+            * Expires in 5 seconds
+            <br>
+            <table>
+                <tr>
+                    <td>
+                        <form class="form-horizontal" method="POST" action="{{ url_for('admin.end_to_end') }}">
+                            {{ form.hidden_tag() }}
+                            {{ form.submit(class='btn') }}
+                        </form>
+                    </td>
+                    <td> &nbsp; </td>
+                    <td>
+                        <a href="{{ url_for('admin.end_to_end') }}" class='btn btn-info'>Reload</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

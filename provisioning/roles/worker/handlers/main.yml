@@ -1,0 +1,23 @@
+---
+
+- name: restart celery
+  supervisorctl: name=celery state={{item}}
+  with_items:
+    - stopped
+    - started
+
+- name: restart beat
+  supervisorctl: name=beat state={{item}}
+  with_items:
+    - stopped
+    - started
+
+- name: rsyslog restart
+  become: yes
+  command: "service rsyslog restart"
+
+- name: restart logentries
+  become: yes
+  service: name=logentries state=restarted
+  ignore_errors: true
+

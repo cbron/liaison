@@ -1,0 +1,51 @@
+{% from 'macros/_misc.html' import render_pagination, render_email_table %}
+{% from "macros/_form.html" import render_form %}
+
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Campaigns' %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header">
+        <h3>Campaigns</h3>
+    </div>
+        <div>
+            <form class="form-horizontal" method="POST" action="{{ url_for('campaign.create') }}">
+                {{ form.hidden_tag() }}
+                {{ form.name(placeholder="Name", class="new-object") }}
+                {{ form.submit(class="btn btn-info") }}
+            </form>
+        </div>
+        <br>
+
+        {% if pagination and pagination.pages > 0 %}
+            {{ pagination.total }} total
+            <table class="table table-striped table-hover content-size">
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Name</td>
+                        <td>Created at</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in pagination.items %}
+                    <tr>
+                        <td>{{ campaign.id }}</td>
+                        <td><a href="{{ url_for('campaign.edit', campaign_id=campaign.id) }}">{{ campaign.name }}</a></td>
+                        <td>{{ campaign.created_humanize() }}</td>
+                        <td>
+                            <form action="{{ url_for('campaign.delete', campaign_id=campaign.id) }}" method="post" role="form">
+                                <button type="submit" onclick="return confirm('Are you sure ?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {{ render_pagination(pagination, 'email.index') }}
+        {% endif %}
+</div>
+{% endblock %}

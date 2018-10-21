@@ -1,0 +1,59 @@
+
+##
+# Supervisor
+###
+
+- name: Install supervisor program file for both celery and beat.
+  become: yes
+  template:
+    src: supervisor.apps.conf.j2
+    dest: /etc/supervisor/conf.d/apps.conf
+  register: supervisor_updated
+
+- name: Load Supervisor
+  become: yes
+  shell: supervisorctl reread
+  shell: supervisorctl update
+  when: supervisor_updated.changed == true
+
+# Logs
+
+- name: Make logentries dir
+  become: yes
+  file:
+    path: /etc/le
+    state: directory
+    mode: 0770
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+
+- name: Copy logentries config file
+  become: yes
+  template:
+    src: le_config_worker.j2
+    dest: /etc/le/config
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+  notify: restart logentries
+
+
+- name: Install logentries daemon APT
+  become: yes
+  apt:
+    name: logentries-daemon
+    state: present
+  notify: restart logentries
+
+# Git
+
+- name: Check if git repo exists
+  stat: path={{app_directory}}/.git
+  register: git_dir
+
+- name: Git filemode must be false
+  replace: >
+    dest={{ app_directory }}/.git/config
+    regexp='filemode = true'
+    replace='filemode = false'
+  when: git_dir.stat.exists

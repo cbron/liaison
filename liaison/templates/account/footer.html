@@ -1,0 +1,70 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Edit Footer' %}
+
+{% block body %}
+  <div class="container">
+    <div class="page-header">
+      <h3>Footer</h3>
+    </div>
+
+    <div class="row">
+      <div class="col-md-10">
+        This footer will be automatically applied to the end of every email sent from this account.
+        <br>
+        Tags are found on the bottom of this page.
+        <hr>
+        <div class='form-group'>
+          <form method="post" name="notification" role="form" action=" {{ url_for('account.footer') }}">
+            {{ form.hidden_tag() }}
+            <div class='html-to-text'>
+              <b>HTML Version</b>
+              <br>
+              {{ form.footer_html(id="footer-editor", class='editor', placeholder='Text here...', rows='10', cols='30') }}
+
+            </div>
+            <small>* You must include both our unsubscribe link and a physical mailing address inside every email you send.</small>
+
+            {% if not auto_text %}
+              <hr>
+              <div>
+                <b>Text Version</b>
+                <br>
+                {{ form.footer_text(id="footer-editor", class='text-from-html-editor', placeholder='Text here...', rows='10', cols='60') }}
+              </div>
+            {% endif %}
+            <br>
+            {{ form.submit(class="btn btn-info") }}
+          </form>
+        </div>
+
+        <b>Tags</b>
+        {% raw %}
+          <table class="table">
+            <tr>
+              <th>Name</th>
+              <th>Output</th>
+              <th>Description</th>
+            </tr>
+            <tr>
+              <td>UNSUBSCRIBE_LINK</td>
+              <td>http://example.com/pf/unsubscribe/83710184042</td>
+              <td>You <b>must</b> add this unsubscribe link to the footer if you aren't providing your own.</td>
+            </tr>
+            <tr>
+              <td>VIEW_IN_BROWSER_LINK</td>
+              <td>http://example.com/pf/vib/83710184042</td>
+              <td>This will allow the user to view the email in a browser instead of their client.</td>
+            </tr>
+          </table>
+          <small>HTML Example: &lt;a href="{{ UNSUBSCRIBE_LINK }}"&gt;Unsubscribe here&lt;/a&gt;</small>
+          <br>
+        {% endraw %}
+        <br>
+
+      </div>
+    </div>
+
+  </div>
+
+{% endblock %}

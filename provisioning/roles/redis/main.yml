@@ -1,0 +1,8 @@
+---
+- hosts: redis
+  vars:
+    - redis_version: 3.0.1
+    - redis_bind: 127.0.0.1
+  roles:
+    - DavidWittman.redis
+# https://galaxy.ansible.com/list#/roles/730

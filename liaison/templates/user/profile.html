@@ -1,0 +1,19 @@
+{% from "macros/_form.html" import render_form %}
+{% set page_title = user.name %}
+
+{% extends "layouts/base.html" %}
+
+{% block body %}
+<div class="container">
+	<h3>Profile</h3>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="settings_wrapper">
+			    {{ render_form(url_for('user.profile'), form) }}
+                <br>
+                <b><a href="{{ url_for_security('change_password') }}">Change your password</a></b>
+			</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

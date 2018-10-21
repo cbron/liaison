@@ -1,0 +1,26 @@
+---
+
+- name: RMQ
+  hosts: rmq
+  gather_facts: false
+  remote_user: "{{ app_user }}"
+  become_user: "{{ app_user }}"
+  vars:
+    - install_app: 0
+    - install_supervisor: 0
+  roles:
+    - base
+    - rmq
+
+- name: RMQ Firewall
+  hosts: rmq
+  become_user: root
+  become: yes
+  gather_facts: true
+  vars:
+    firewall_allowed_tcp_ports:
+      - "2853" # ssh, already changed from 22
+      - "5672" # rmq port
+      - "15672" # rmq interface
+  roles:
+    - geerlingguy.firewall

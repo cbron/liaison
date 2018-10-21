@@ -1,0 +1,77 @@
+---
+
+# Logrotate
+
+- name: Copy logrotate config file
+  become: yes
+  template:
+    src: logrotate/logrotate.j2
+    dest: /etc/logrotate.d/liaison
+
+- name: Copy logrotate s3 upload bash file
+  become: yes
+  template:
+    src: logrotate/logrotate_upload.sh.j2
+    dest: /usr/local/bin/logrotate_upload.sh
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0770
+
+- name: Copy logrotate shutdown file
+  become: yes
+  template:
+    src: logrotate/logrotate_shutdown_hook.conf.j2
+    dest: /etc/init/logrotate_shutdown_hook.conf
+
+- name: configure s3cmd
+  become: yes
+  template:
+    src: logrotate/s3cfg.j2
+    dest: /root/.s3cfg
+
+# http://docs.ansible.com/cron_module.html
+- cron:
+    name: "backup logs to aws"
+    minute: "5"
+    hour: "1"
+    job: "sudo /usr/local/bin/logrotate_upload.sh >> {{log_dir}}/logrotate_upload.log 2>&1"
+
+
+# Logentries
+# https://logentries.com/doc/linux-agent-autoscaling/
+
+- name: Add APT repositories
+  become: yes
+  apt_repository:
+    repo: "deb http://rep.logentries.com/ trusty main" # <- 14.04
+    update_cache: yes
+
+- name: Add APT keys
+  become: yes
+  apt_key:
+    id: changme
+    keyserver: keyserver.ubuntu.com
+    state: present
+
+- name: update cache for logentries
+  become: yes
+  apt: update_cache=yes
+
+- name: Install packages APT
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - logentries
+
+- name: Check if host is registered
+  command: le whoami
+  register: le_registered
+  ignore_errors: true
+  changed_when: false
+
+- name: Register host
+  shell: "le reinit --user-key={{ logentries_account_key }} --pull-server-side-config=False"
+  when: le_registered|failed
+

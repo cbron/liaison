@@ -1,0 +1,22 @@
+---
+
+- name: restart supervisor
+  become: yes
+  service: name=supervisor state=restarted
+
+- name: restart ssh
+  become: yes
+  # service: name=ssh state=restarted #  <- bug in ansible
+  command: "service ssh restart"
+
+- name: update timezone
+  become: yes
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+
+- name: rsyslog restart
+  become: yes
+  command: "service rsyslog restart"
+
+- name: restart logentries
+  become: yes
+  service: name=logentries state=restarted

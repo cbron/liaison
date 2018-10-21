@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+{% set page_title = 'Terms of Service' %}
+{% block body %}
+    <div class='col-md-8 col-md-offset-1'>
+        {{content}}
+        {% if not accepted %}
+            <form class="form-horizontal" method="POST" action="{{ url_for('user.terms') }}">
+                {{ form.hidden_tag() }}
+                {{ form.submit(class="btn btn-success") }}
+            </form>
+        {% endif %}
+        <br>
+    </div>
+{% endblock %}
+
+

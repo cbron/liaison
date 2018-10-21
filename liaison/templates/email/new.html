@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+{% set page_title = 'New Email' %}
+
+{% block body %}
+<div class="container">
+  <div class="jumbotron">
+      <h2>New Email</h2>
+      <br>
+      <a href="{{ url_for('campaign.edit', campaign_id=campaign.id) }}">Back to Campaign</a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-10">
+      <form method="post" name="notification" role="form" action=" {{ url_for('email.create', campaign_id=campaign.id) }}">
+        <div class='form-group article-content'>
+          {{ form.hidden_tag() }}
+          <div class="row">
+            <div class="col-md-3">
+              <label>Email Name*</label>
+              {{ form.name() }}
+            </div>
+            {% if campaign.list_id and campaign.selector_col_name %}
+              <div class="col-md-6">
+                <label>Who does this email get sent to ?</label>
+                {{ form.selector_col_val() }}
+              </div>
+            {% endif %}
+          </div>
+          <br>
+          <label>Optional Templates:</label><br>
+          <div class='row'>
+            {% for template in templates %}
+              <div class='col-md-4 template-style'>
+                <div class='template-title'><center>{{ template[2] }}</center></div>
+                <img src="{{url_for('static', filename='templates/{}.jpg'.format(template[1]) )}}">
+                <span data-template-id='{{template[0]}}'></span>
+              </div>
+            {% endfor %}
+          </div>
+          <br>
+          <div class='row'>
+              <div class='col-md-8 template-style'></div>
+              <div class='col-md-4'>
+                <small>Templates kindly provided by <a href='http://zurb.com/playground/responsive-email-templates'>Zurb Studios.</a></small>
+              </div>
+          </div>
+
+          <br>
+          {{ form.submit(class="btn btn-info") }}
+        </form>
+        <br>
+        <br>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'layouts/base.html' %}
+{% set page_title = 'Home' %}
+{% block body %}
+
+<div class="container">
+    <div class="page-header">
+        <h3>Hello, {{ user.name }} </h3>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <h6>Welcome to CHANGEME.</h6>
+            A fast and efficient tool for sending highly dynamic emails.
+            <br>
+            <hr>
+            <div class=''>
+                <a href='{{url_for("user.profile")}}' class='btn btn-default'>Edit your profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% from "macros/_form.html" import render_form %}
+
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Edit List' %}
+
+{% block body %}
+    <div class="container">
+        <div class="page-header">
+            <h2>{{ list.name.capitalize() }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <p>
+                    Upload a .csv file that is filtered to the customers you wish to send the email to.
+                    This file should contain both the customer and consultant data on a single line. <i>Do not</i> upload
+                    any sensitive information.
+                </p>
+                <p>
+                    After the list is uploaded create a campaign and then select this list in the right sidebar to start using it.
+                </p>
+            </div>
+            <div class="col-md-4 col-md-offset-1">
+                <form action="{{ url_for('list_.upload_file', list_id=list.id) }}" method=post enctype=multipart/form-data>
+                    <p>
+                        <input type=file name=file>
+                        <input type=submit value=Upload>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        {% if data %}
+            <a href="{{ url_for('campaign.index') }}" class='btn btn-info'>Create a new campaign</a>
+            <hr>
+            <h4>Data</h4>
+
+            {% if data[0]|length == 1 %}
+                </br><center style='color: red'>It looks like the data you uploaded is tab-delimeted or corrupted. Please try a different file.</center><br>
+            {% endif %}
+
+            Random sample of {{ length }} total contacts
+            <table class='table table-striped content-size' id='random_list_data_table'>
+                <tr>
+                    {% for k,v in data[0].iteritems() %}
+                        {% if k != 'm_hash_id' %}
+                            <th>{{ k }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% for row in data %}
+                    <tr>
+                        {% for k,v in row.iteritems() %}
+                            {% if k != 'm_hash_id' %}
+                                <td>{{ v }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <hr>
+            <a href="{{ url_for('list_.edit', list_id=list.id) }}" class='btn btn-info'>Check for data</a>
+        {% endif %}
+    </div>
+{% endblock %}

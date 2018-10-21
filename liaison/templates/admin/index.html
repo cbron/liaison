@@ -1,0 +1,67 @@
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Admin' %}
+
+{% block body %}
+    <div class="container">
+        <div class="page-header">
+            <h2>Admin</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                <h5><a href="{{url_for('admin.sends')}}">Sends</a></h5>
+                <h5><a href="{{url_for('admin.dispatches')}}">Dispatches</a></h5>
+                <h5><a href="{{url_for('admin.end_to_end')}}">End To End</a></h5>
+                <h5><a href="{{url_for('admin.load_test', count=0)}}">Load Test</a></h5>
+            </div>
+            <div class='col-md-5 col-md-offset-1'>
+                {% if redis_status %}
+                    Redis Online
+                {% else %}
+                    <b style='color:red'>Redis Offline</b>
+                {% endif %}
+                <br><br>
+
+                <table class='table'>
+                    <tr>
+                        <td>default</td>
+                        <td>{{default}}</td>
+                    </tr>
+                    <tr>
+                        <td>dispatcher</td>
+                        <td>{{dispatcher}}</td>
+                    </tr>
+                    <tr>
+                        <td>mail</td>
+                        <td>{{mail}}</td>
+                    </tr>
+                    <tr>
+                        <td>beat</td>
+                        <td>{{beat}}</td>
+                    </tr>
+                    <tr>
+                        <td>vib_counter</td>
+                        <td>{{vib_counter}}</td>
+                    </tr>
+                    <tr>
+                        <td>(Beat) Check Scheduled sends: in progress</td>
+                        <td>{{beat_retry_failues}}</td>
+                    </tr>
+                    <tr>
+                        <td>(Beat) Check Scheduled sends: blocked count</td>
+                        <td>{{lock_violation_send_scheduled}}</td>
+                    </tr>
+                    <tr>
+                        <td>(Beat) Retry Failures: in progress</td>
+                        <td>{{beat_send_scheduled}}</td>
+                    </tr>
+                    <tr>
+                        <td>(Beat) Retry Failures: blocked count</td>
+                        <td>{{lock_violation_retry_failures}}</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

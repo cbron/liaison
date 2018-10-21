@@ -1,0 +1,46 @@
+{% from 'macros/_misc.html' import render_pagination, render_dispatch_table %}
+{% extends 'layouts/base.html' %}
+
+{% set page_title = 'Dispatcher' %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header">
+        <h3>Dispatches</h3>
+    </div>
+    {% if pagination %}
+        <table class='table table-striped content-size'>
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>Campaign</td>
+                    <td>Status</td>
+                    <td>Progress</td>
+                    <td>Count</td>
+                    <td>User</td>
+                    <td>Date</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dispatch in pagination.items %}
+                <tr>
+                    <td>{{ dispatch.id }}</td>
+                    <td><a href="{{ url_for('campaign.edit', campaign_id=dispatch.campaign_id) }}">{{ dispatch.campaign.name }}</a></td>
+                    <td>{{ dispatch.current_state() }}</td>
+                    {% if redis %}
+                        <td>{{ "%s%s" % (dispatch.get_percent_complete(), "%") }}</td>
+                    {% else %}
+                        <td>{{ dispatch.percent_complete }}%</td>
+                    {% endif %}
+                    <td>{{ dispatch.sent_count }}</td>
+                    <td>{{ dispatch.user.name }}</td>
+                    <td>{{ dispatch.created_humanize() }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ render_pagination(pagination, 'dispatcher.index') }}
+    {% endif %}
+
+</div>
+{% endblock %}

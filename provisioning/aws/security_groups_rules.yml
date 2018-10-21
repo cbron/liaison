@@ -1,0 +1,77 @@
+---
+
+##
+# Load balancer should have listeners listed below, with a healthcheck of http:1443
+# http -> 80 - http -> 80
+# https -> 443 - http -> 1443
+##
+
+security_groups:
+
+  - name: "{{ vpc_prefix }}_sg_lb"
+    description: security group for elastic load balancer
+    rules:
+      - { proto: tcp, from_port: 443, to_port: 443, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0 }
+    rules_egress:
+      - { proto: tcp, from_port: 80, to_port: 80, group_name: "{{ vpc_prefix }}_sg_web" }
+      - { proto: tcp, from_port: 1443, to_port: 1443, group_name: "{{ vpc_prefix }}_sg_web" }
+
+  - name: "{{ vpc_prefix }}_sg_web"
+    description: security group for webservers
+    rules:
+      - { proto: tcp, from_port: 80, to_port: 80, group_name: "{{ vpc_prefix }}_sg_lb"  } # necessary for redirection
+      - { proto: tcp, from_port: 1443, to_port: 1443, group_name: "{{ vpc_prefix }}_sg_lb" } # allow LB
+      - { proto: tcp, from_port: 1443, to_port: 1443, cidr_ip: "{{ allowed_ip }}" } # allow my IP
+      - { proto: tcp, from_port: 2853, to_port: 2853, cidr_ip: "{{ allowed_ip }}"} # workers
+      - { proto: tcp, from_port: 5555, to_port: 5555, cidr_ip: "{{ allowed_ip }}"} # flower
+    rules_egress:
+      - { proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 443, to_port: 443, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 587, to_port: 587, cidr_ip: 0.0.0.0/0 } # mail
+      - { proto: tcp, from_port: 5432, to_port: 5432, group_name: "{{ vpc_prefix }}_sg_db"} # rds
+      - { proto: tcp, from_port: 6379, to_port: 6379, group_name: "{{ vpc_prefix }}_sg_cache"} # redis
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.167/32 } # bitbucket
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.168/32 }
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.169/32 }
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.170/32 }
+      - { proto: tcp, from_port: 6514, to_port: 6514, cidr_ip: 0.0.0.0/0 } # syslog
+      - { proto: tcp, from_port: 11371, to_port: 11371, cidr_ip: 0.0.0.0/0 } # gpg keys
+
+  - name: "{{ vpc_prefix }}_sg_worker"
+    description: security group for workers
+    rules:
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: "{{ allowed_ip }}" }
+      - { proto: tcp, from_port: 2853, to_port: 2853, cidr_ip: "{{ allowed_ip }}" }
+    rules_egress:
+      - { proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 443, to_port: 443, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 587, to_port: 587, cidr_ip: 0.0.0.0/0 } # mail
+      - { proto: tcp, from_port: 5432, to_port: 5432, group_name: "{{ vpc_prefix }}_sg_db"} # rds
+      - { proto: tcp, from_port: 6379, to_port: 6379, group_name: "{{ vpc_prefix }}_sg_cache"} # redis broker
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.167/32 } # bitbucket
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.168/32 }
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.169/32 }
+      - { proto: tcp, from_port: 22, to_port: 22, cidr_ip: 131.103.20.170/32 }
+      - { proto: tcp, from_port: 6514, to_port: 6514, cidr_ip: 0.0.0.0/0 } # syslog
+      - { proto: tcp, from_port: 11371, to_port: 11371, cidr_ip: 0.0.0.0/0 } # gpg keys
+
+  - name: "{{ vpc_prefix }}_sg_db"
+    description: security group for databases
+    rules:
+      - { proto: tcp, from_port: 5432, to_port: 5432, group_name: "{{ vpc_prefix }}_sg_web" }
+      - { proto: tcp, from_port: 5432, to_port: 5432, group_name: "{{ vpc_prefix }}_sg_worker" }
+    rules_egress:
+      - { proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 443, to_port: 443, cidr_ip: 0.0.0.0/0 }
+
+  - name: "{{ vpc_prefix }}_sg_cache"
+    description: security group for redis caches
+    rules:
+      - { proto: tcp, from_port: 6379, to_port: 6379, group_name: "{{ vpc_prefix }}_sg_web" }
+      - { proto: tcp, from_port: 6379, to_port: 6379, group_name: "{{ vpc_prefix }}_sg_worker" }
+    rules_egress:
+      - { proto: tcp, from_port: 80, to_port: 80, cidr_ip: 0.0.0.0/0 }
+      - { proto: tcp, from_port: 443, to_port: 443, cidr_ip: 0.0.0.0/0 }
+
+
