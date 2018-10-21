@@ -2,7 +2,7 @@
 
 Liaison was an email communication platform. It allowed users to create or upload html content and handled delivery to customers. The defining ability was the automatic adjustment of email headers to send on behalf of 3rd parties, which is critical to a business model seeking a client facing email from a personalized sales force. It was also highly dynamic to allow for varying customer data and content which would be imported into the system.
 
-What you see here is a stripped down version of the platform that could be used as an example for other projects. After the conclusion of this project, Mandrill dramatically changed how it operates the rendering it useless as an email delivery service. A similar provider like Sendgrid or Mailgun could be used instead. Most aspects, especially the provisioning, would need significant updates to work in a different environment than what was originally setup.
+What you see here is a stripped down version of the platform that could be used as an example for other projects. After the conclusion of this project, Mandrill dramatically changed how it operates rendering it useless as an email delivery service. A similar provider like Sendgrid or Mailgun could be used instead. Most aspects, especially the provisioning, would need significant updates to work in a different environment than what was originally setup.
 
 Tech Stack:
 
@@ -40,7 +40,7 @@ Hosting:
 * `brew install`
     * `rabbitmq`
     * `postgresql`
-* create database liaison in postgresql
+* create database `liaison` in postgresql
 * `mkdir {log_dir}`
 * `git clone ...`
 * `cd liaison`
